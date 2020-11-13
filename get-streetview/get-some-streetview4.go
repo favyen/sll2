@@ -124,8 +124,9 @@ func GetStreetView(metadata PanoMetadata, key string, fname string) {
 
 func main() {
 	predFname := os.Args[1]
-	key := os.Args[2]
-	outPath := os.Args[3]
+	graphFname := os.Args[2]
+	key := os.Args[3]
+	outPath := os.Args[4]
 
 	// load predicted points
 	bytes, err := ioutil.ReadFile(predFname)
@@ -144,7 +145,7 @@ func main() {
 
 	// load road network graph
 	log.Println("loading graph")
-	g, err := common.ReadGraph("la.graph")
+	g, err := common.ReadGraph(graphFname)
 	if err != nil {
 		panic(err)
 	}

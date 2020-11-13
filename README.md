@@ -8,7 +8,13 @@ Suppose data is organized like this:
 
 First, apply YOLOv3 model on satellite images (test set):
 
-	go run run-yolo-json.go data/yolov3/yolov3.cfg data/yolov3/yolov3.best data/dataset/ test sat-output.json
+	# first need to setup modified version of darknet from https://github.com/uakfdotb/darknet
+	# (modification is one line change to print the bounding box to stdout)
+	ln -s /path/to/darknet darknet
+
+	# the run-yolo scripts need absolute path to yolov3 cfg, model, and images
+	go run run-yolo-json.go /path/to/data/yolov3/yolov3.cfg /path/to/data/yolov3/yolov3.best /path/to/data/dataset/ test sat-output.json
+
 	python3 test.py data/manual41.json sat-output.json data/dataset/test_df.csv
 
 Next, threshold the detections and convert them from pixel coordinates to longitude-latitude.
@@ -20,10 +26,10 @@ This is needed to fetch images from streetview API.
 Now we can fetch a few streetview images for each street light detection:
 
 	mkdir sv-images/
-	go run get-some-streetview4.go sat-output-thresholded-lonlat.json [Google API Key] sv-images/
+	go run get-streetview/get-some-streetview4.go sat-output-thresholded-lonlat.json data/la.graph [Google API Key] sv-images/
 
 And then run YOLOv3 on streetview:
 
-	go run run-streetview-yolo4.go data/yolov3sv/yolov3.cfg data/yolov3sv/yolov3.best sv-images/ sv-detections.json
-
-Then there is some code get-streetview/streetview_integrate4b.py that can be adapted to combine satellite image detections with streetview detections.
+	go run run-streetview-yolo4.go /path/to/data/yolov3sv/yolov3.cfg /path/to/data/yolov3sv/yolov3.best /path/to/sv-images/ sv-detections.json
+	python get-streetview/streetview_integrate_clean.py sat-output-thresholded.json sv-detections.json sv-images/ data/dataset/training_v1.csv final.json
+	python3 test.py data/manual41.json final.json data/dataset/test_df.csv
